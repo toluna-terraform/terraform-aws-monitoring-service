@@ -10,3 +10,10 @@ Toluna [Terraform module](https://registry.terraform.io/modules/toluna-terraform
   subnets = module.vpc.private_subnet_ids
   hosted_zone = "___.tolunainsights-internal.com"
 }```
+
+## Production
+If you Apply this module on Production environment, please set:
+```
+enable_deletion_protection = true
+backup_retention_period = 7
+```

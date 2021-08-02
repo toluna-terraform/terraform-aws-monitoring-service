@@ -12,6 +12,16 @@ resource "aws_ecs_cluster" "monitoring_cluster" {
     name  = "containerInsights"
     value = "enabled"
   }
+
+  tags = merge(
+    var.tags,
+    map(
+      "Name", "ecs-${local.service_name}",
+      "environment", var.env_name,
+      "application_role", "monitoring",
+      "created_by", "terraform"
+    )
+  )
 }
 
 resource "aws_ecs_service" "monitoring_service" {
@@ -21,6 +31,15 @@ resource "aws_ecs_service" "monitoring_service" {
   desired_count   = 1
   launch_type = "FARGATE"
   depends_on      = [aws_iam_role_policy.td_role_policy,aws_lb.monitoring_lb]
+  tags = merge(
+    var.tags,
+    map(
+      "Name", "ecs-${local.service_name}-service",
+      "environment", var.env_name,
+      "application_role", "monitoring",
+      "created_by", "terraform"
+    )
+  )
 
   network_configuration {
     security_groups  = [data.aws_security_group.selected.id]
@@ -41,6 +60,15 @@ resource "aws_lb_target_group" "monitoring_tg" {
   protocol    = "TCP"
   target_type = "ip"
   vpc_id      = var.vpc_id
+  tags = merge(
+    var.tags,
+    map(
+      "Name", "tg-${local.service_name}",
+      "environment", var.env_name,
+      "application_role", "monitoring",
+      "created_by", "terraform"
+    )
+  )
 }
 
 resource "aws_lb" "monitoring_lb" {
@@ -48,11 +76,16 @@ resource "aws_lb" "monitoring_lb" {
   internal           = true
   load_balancer_type = "network"
   subnets            = var.service_subnets
-  enable_deletion_protection = false
-
-  tags = {
-    Environment = "${var.env_name}"
-  }
+  enable_deletion_protection = var.enable_deletion_protection
+  tags = merge(
+    var.tags,
+    map(
+      "Name", "nlb-${local.service_name}",
+      "environment", var.env_name,
+      "application_role", "monitoring",
+      "created_by", "terraform"
+    )
+  )
 }
 
 resource "aws_lb_listener" "monitoring_lb_listener" {
@@ -60,8 +93,8 @@ resource "aws_lb_listener" "monitoring_lb_listener" {
   port              = "80"
   protocol          = "TCP"
 
- default_action {
-   type             = "forward"
+  default_action {
+    type             = "forward"
     target_group_arn = aws_lb_target_group.monitoring_tg.arn
   }
 }
@@ -108,11 +141,20 @@ resource "aws_ssm_parameter" "db_username" {
 resource "aws_db_subnet_group" "default" {
   name       = "netgr-${local.service_name}"
   subnet_ids = var.db_subnets
+  tags = merge(
+    var.tags,
+    map(
+      "Name", "netgr-${local.service_name}",
+      "environment", var.env_name,
+      "application_role", "monitoring",
+      "created_by", "terraform"
+    )
+  )
 }
 
 resource "aws_db_instance" "default" {
   allocated_storage    = 20
-  identifier           = local.service_name
+  identifier           = "db-${local.service_name}"
   engine               = "mysql"
   engine_version       = "8.0"
   instance_class       = "db.t2.micro"
@@ -123,6 +165,17 @@ resource "aws_db_instance" "default" {
   skip_final_snapshot  = true
   vpc_security_group_ids = [data.aws_security_group.selected.id]
   db_subnet_group_name = aws_db_subnet_group.default.name
+  deletion_protection = var.enable_deletion_protection
+  backup_retention_period = var.backup_retention_period
+  tags = merge(
+    var.tags,
+    map(
+      "Name", "${local.service_name}",
+      "environment", var.env_name,
+      "application_role", "monitoring",
+      "created_by", "terraform"
+    )
+  )
 }
 
 resource "aws_route53_record" "monitoring_db_record" {
