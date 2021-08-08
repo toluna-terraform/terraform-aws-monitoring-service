@@ -35,3 +35,7 @@ variable "backup_retention_period" {
   default = 3
   
 }
+
+variable "task_definition_already_exists" {
+  default = true
+}

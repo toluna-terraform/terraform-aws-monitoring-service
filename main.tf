@@ -2,6 +2,7 @@ locals {
   security_group = "sgr-${var.env_name}-dc-internal"
   load_balancer  = {"target_group_arn":"${data.aws_lb_target_group.tg.arn}","container_name":"icinga","container_port":80}
   service_name   = "${var.env_name}-monitoring"
+  task_definition_family = "icinga"
 }
 
 resource "aws_ecs_cluster" "monitoring_cluster" {
@@ -184,4 +185,17 @@ resource "aws_route53_record" "monitoring_db_record" {
   type    = "CNAME"
   ttl     = "300"
   records = [aws_db_instance.default.address]
+}
+
+resource "aws_ecs_task_definition" "service_td" {
+  count = var.task_definition_already_exists ? 0 : 1
+  family                   = "td-${var.env_name}-${local.task_definition_family}"
+  container_definitions    = templatefile("${path.module}/templates/icinga.json.tpl",{ ENV_NAME = var.env_name, SHORT_ENV_NAME = var.short_env_name }) 
+  volume {
+    name      = "service-storage"
+    host_path = "/ecs/service-storage"
+  }
+  lifecycle {
+    ignore_changes = all
+   }
 }
