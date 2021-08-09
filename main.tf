@@ -43,7 +43,7 @@ resource "aws_ecs_service" "monitoring_service" {
   )
 
   network_configuration {
-    security_groups  = [data.aws_security_group.selected.id]
+    security_groups  = [data.aws_security_group.dc_internal.id]
     subnets          = var.service_subnets
   }
 
@@ -164,7 +164,7 @@ resource "aws_db_instance" "default" {
   password               = random_password.password.result
   parameter_group_name = "default.mysql8.0"
   skip_final_snapshot  = true
-  vpc_security_group_ids = [data.aws_security_group.selected.id]
+  vpc_security_group_ids = [data.aws_security_group.dc_internal.id]
   db_subnet_group_name = aws_db_subnet_group.default.name
   deletion_protection = var.enable_deletion_protection
   backup_retention_period = var.backup_retention_period
@@ -198,4 +198,59 @@ resource "aws_ecs_task_definition" "service_td" {
   lifecycle {
     ignore_changes = all
    }
+}
+
+resource "aws_security_group" "monitoring_sg" {
+  name        = local.service_name
+  description = "Security-Group for Logging service."
+  vpc_id      = var.vpc_id
+
+ 
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(
+    var.tags,
+    map(
+      "Name", local.service_name,
+      "itwp-environment", var.env_name,
+      "dc", "sg_test",
+      "itwp-application_role", "network",
+      "created_by", "terraform"
+    )
+  )
+}
+
+resource "aws_security_group_rule" "tcp_5665" {
+  type              = "ingress"
+  from_port         = 5665
+  to_port           = 5665
+  protocol          = "tcp"
+  cidr_blocks       = [data.aws_vpc.selected.cidr_block]
+  security_group_id = aws_security_group.monitoring_sg.id
+  description       = "Allow 5665 TCP from VPC" 
+}
+
+resource "aws_security_group_rule" "http_80" {
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  source_security_group_id = data.aws_security_group.dc_internal.id
+  security_group_id = aws_security_group.monitoring_sg.id
+  description       = "Allow 80 TCP from VPC" 
+}
+
+resource "aws_security_group_rule" "https_443" {
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  source_security_group_id = data.aws_security_group.dc_internal.id
+  security_group_id = aws_security_group.monitoring_sg.id
+  description       = "Allow 443 TCP from VPC" 
 }

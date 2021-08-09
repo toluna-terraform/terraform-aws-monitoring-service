@@ -35,7 +35,7 @@ data "aws_ecs_task_definition" "icinga" {
   task_definition = "td-${var.env_name}-icinga"
 }
 
-data "aws_security_group" "selected" {
+data "aws_security_group" "dc_internal" {
   name = local.security_group
 }
 
@@ -47,4 +47,8 @@ data "aws_lb_target_group" "tg" {
 data "aws_route53_zone" "selected" {
   name         = var.hosted_zone
   private_zone = true
+}
+
+data "aws_vpc" "selected" {
+  id = var.vpc_id
 }
