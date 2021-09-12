@@ -16,7 +16,7 @@ resource "aws_ecs_cluster" "monitoring_cluster" {
 
   tags = merge(
     var.tags,
-    map(
+    tomap(
       "Name", "ecs-${local.service_name}",
       "environment", var.env_name,
       "application_role", "monitoring",
@@ -34,7 +34,7 @@ resource "aws_ecs_service" "monitoring_service" {
   depends_on      = [aws_iam_role_policy.td_role_policy,aws_lb.monitoring_lb]
   tags = merge(
     var.tags,
-    map(
+    tomap(
       "Name", "ecs-${local.service_name}-service",
       "environment", var.env_name,
       "application_role", "monitoring",
@@ -63,7 +63,7 @@ resource "aws_lb_target_group" "monitoring_tg" {
   vpc_id      = var.vpc_id
   tags = merge(
     var.tags,
-    map(
+    tomap(
       "Name", "tg-${local.service_name}",
       "environment", var.env_name,
       "application_role", "monitoring",
@@ -80,7 +80,7 @@ resource "aws_lb" "monitoring_lb" {
   enable_deletion_protection = var.enable_deletion_protection
   tags = merge(
     var.tags,
-    map(
+    tomap(
       "Name", "nlb-${local.service_name}",
       "environment", var.env_name,
       "application_role", "monitoring",
@@ -144,7 +144,7 @@ resource "aws_db_subnet_group" "default" {
   subnet_ids = var.db_subnets
   tags = merge(
     var.tags,
-    map(
+    tomap(
       "Name", "netgr-${local.service_name}",
       "environment", var.env_name,
       "application_role", "monitoring",
@@ -170,7 +170,7 @@ resource "aws_db_instance" "default" {
   backup_retention_period = var.backup_retention_period
   tags = merge(
     var.tags,
-    map(
+    tomap(
       "Name", "${local.service_name}",
       "environment", var.env_name,
       "application_role", "monitoring",
@@ -215,7 +215,7 @@ resource "aws_security_group" "monitoring_sg" {
 
   tags = merge(
     var.tags,
-    map(
+    tomap(
       "Name", local.service_name,
       "itwp-environment", var.env_name,
       "dc", "sg_test",
