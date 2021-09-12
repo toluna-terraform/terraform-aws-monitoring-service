@@ -2,7 +2,8 @@
 Toluna [Terraform module](https://registry.terraform.io/modules/toluna-terraform/monitoring-service/aws/latest), which creates Icinga service on ECS Fargate.
 
 ## Usage
-```module "monitoring_service"{
+```
+module "monitoring_service"{
   source = "toluna-terraform/monitoring-service/aws"
   version = "~>0.0.1"
   env_name = local.main.env_name
@@ -14,7 +15,7 @@ Toluna [Terraform module](https://registry.terraform.io/modules/toluna-terraform
   task_definition_already_exists = true // change to false if the TD (icinga) is not exist.
   
 }
-}```
+```
 
 ## Production
 If you Apply this module on Production environment, please set:
