@@ -17,10 +17,10 @@ resource "aws_ecs_cluster" "monitoring_cluster" {
   tags = merge(
     var.tags,
     tomap({
-      "Name", "ecs-${local.service_name}",
-      "environment", var.env_name,
-      "application_role", "monitoring",
-      "created_by", "terraform"
+      "Name" = "ecs-${local.service_name}",
+      "environment" = "${var.env_name}",
+      "application_role" = "monitoring",
+      "created_by" = "terraform"
     })
   )
 }
@@ -35,10 +35,10 @@ resource "aws_ecs_service" "monitoring_service" {
   tags = merge(
     var.tags,
     tomap({
-      "Name", "ecs-${local.service_name}-service",
-      "environment", var.env_name,
-      "application_role", "monitoring",
-      "created_by", "terraform"
+      "Name" = "ecs-${local.service_name}-service",
+      "environment" = "${var.env_name}",
+      "application_role" = "monitoring",
+      "created_by" = "terraform"
     })
   )
 
@@ -64,10 +64,10 @@ resource "aws_lb_target_group" "monitoring_tg" {
   tags = merge(
     var.tags,
     tomap({
-      "Name", "tg-${local.service_name}",
-      "environment", var.env_name,
-      "application_role", "monitoring",
-      "created_by", "terraform"
+      "Name" = "tg-${local.service_name}",
+      "environment" = "${var.env_name}",
+      "application_role" = "monitoring",
+      "created_by" = "terraform"
     })
   )
 }
@@ -81,10 +81,10 @@ resource "aws_lb" "monitoring_lb" {
   tags = merge(
     var.tags,
     tomap({
-      "Name", "nlb-${local.service_name}",
-      "environment", var.env_name,
-      "application_role", "monitoring",
-      "created_by", "terraform"
+      "Name" = "nlb-${local.service_name}",
+      "environment" = "${var.env_name}",
+      "application_role" = "monitoring",
+      "created_by" = "terraform"
     })
   )
 }
@@ -145,10 +145,10 @@ resource "aws_db_subnet_group" "default" {
   tags = merge(
     var.tags,
     tomap({
-      "Name", "netgr-${local.service_name}",
-      "environment", var.env_name,
-      "application_role", "monitoring",
-      "created_by", "terraform"
+      "Name" = "netgr-${local.service_name}",
+      "environment" = "${var.env_name}",
+      "application_role" = "monitoring",
+      "created_by" = "terraform"
     })
   )
 }
@@ -171,10 +171,10 @@ resource "aws_db_instance" "default" {
   tags = merge(
     var.tags,
     tomap({
-      "Name", "${local.service_name}",
-      "environment", var.env_name,
-      "application_role", "monitoring",
-      "created_by", "terraform"
+      "Name" = "${local.service_name}",
+      "environment" = "${var.env_name}",
+      "application_role" = "monitoring",
+      "created_by" = "terraform"
     })
   )
 }
@@ -216,11 +216,11 @@ resource "aws_security_group" "monitoring_sg" {
   tags = merge(
     var.tags,
     tomap({
-      "Name", local.service_name,
-      "itwp-environment", var.env_name,
-      "dc", "sg_test",
-      "itwp-application_role", "network",
-      "created_by", "terraform"
+      "Name" = "${local.service_name}",
+      "itwp-environment" = "${var.env_name}",
+      "dc" = "sg_test",
+      "itwp-application_role" = "network",
+      "created_by" = "terraform"
     })
   )
 }
