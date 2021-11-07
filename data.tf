@@ -32,7 +32,6 @@ data "aws_iam_policy_document" "td_role_policy" {
 }
 
 data "aws_ecs_task_definition" "icinga" {
-  count = var.task_definition_already_exists ? 1 : 0
   task_definition = "td-${var.env_name}-icinga"
 }
 
