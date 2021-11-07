@@ -113,7 +113,7 @@ resource "aws_iam_role_policy" "td_role_policy" {
 
 resource "aws_route53_record" "monitoring_service_record" {
   zone_id = data.aws_route53_zone.selected.zone_id
-  name    = "new_monitoring"
+  name    = "monitoring"
   type    = "CNAME"
   ttl     = "300"
   records = [aws_lb.monitoring_lb.dns_name]
