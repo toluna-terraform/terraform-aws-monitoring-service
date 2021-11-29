@@ -28,7 +28,7 @@ resource "aws_ecs_cluster" "monitoring_cluster" {
 resource "aws_ecs_service" "monitoring_service" {
   name            = "ecs-${local.service_name}-service"
   cluster         = aws_ecs_cluster.monitoring_cluster.id
-  task_definition = "arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:task-definition/td-${var.env_name}-icinga:${data.aws_ecs_task_definition.icinga.revision}"
+  task_definition = var.task_definition_already_exists ? "arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:task-definition/td-${var.env_name}-icinga:${data.aws_ecs_task_definition.icinga.revision}" : aws_ecs_task_definition.service_td.arn
   desired_count   = 1
   launch_type = "FARGATE"
   depends_on      = [aws_iam_role_policy.td_role_policy,aws_lb.monitoring_lb]
@@ -43,7 +43,7 @@ resource "aws_ecs_service" "monitoring_service" {
   )
 
   network_configuration {
-    security_groups  = [data.aws_security_group.dc_internal.id]
+    security_groups  = [data.aws_security_group.dc_internal.id, aws_security_group.monitoring_sg.id]
     subnets          = var.service_subnets
   }
 
@@ -164,7 +164,7 @@ resource "aws_db_instance" "default" {
   password               = random_password.password.result
   parameter_group_name = "default.mysql8.0"
   skip_final_snapshot  = true
-  vpc_security_group_ids = [data.aws_security_group.dc_internal.id]
+  vpc_security_group_ids = [data.aws_security_group.dc_internal.id, aws_security_group.monitoring_sg.id]
   db_subnet_group_name = aws_db_subnet_group.default.name
   deletion_protection = var.enable_deletion_protection
   backup_retention_period = var.backup_retention_period
